@@ -2,262 +2,299 @@
 #include <string>
 using namespace std;
 
-class Event
+class Event 
 {
 private:
-    string name;
-    string date;
-    string time;
-    string* eventType; // Dynamically defined field
-    static const int maxSeats = 200; // Static field representing the maximum number of seats
-    int seatsReserved[maxSeats]; // Statically defined array 
+    string* type; // Dynamically defined field
+    string* date;
+    string* time;
+    string* location;
+    const static int MAX_SEATS = 20; // static field
+    string seats[MAX_SEATS]; // statically defined array
 
 public:
     // Constructors
-    Event() : name(""), date(""), time(""), eventType(nullptr)
-    {
-        for (int i = 0; i < maxSeats; ++i)
-        {
-            seatsReserved[i] = 0;
-        }
-    }
-
-    Event(string n, string d, string t, string type) : name(n), date(d), time(t)
-    {
-        if (type.length() > 0)
-        {
-            eventType = new string(type);
-        }
-        else
-        {
-            throw invalid_argument("Event type cannot be empty.");
-        }
-
-        for (int i = 0; i < maxSeats; ++i)
-        {
-            seatsReserved[i] = 0;
-        }
-    }
-
-    // Copy constructor
-    Event(const Event& other) : name(other.name), date(other.date), time(other.time)
-    {
-        eventType = new string(*(other.eventType));
-
-        for (int i = 0; i < maxSeats; ++i)
-        {
-            seatsReserved[i] = other.seatsReserved[i];
-        }
-    }
+    Event();
+    Event(string t, string l, string d, string tm);
+    Event(const Event& other);
 
     // Destructor
-    ~Event()
-    {
-        delete eventType;
-    }
-
-    // Overloaded assignment operator
-    Event& operator=(const Event& other)
-    {
-        if (this != &other)
-        {
-            delete eventType;
-            name = other.name;
-            date = other.date;
-            time = other.time;
-            eventType = new string(*(other.eventType));
-
-            for (int i = 0; i < maxSeats; ++i)
-            {
-                seatsReserved[i] = other.seatsReserved[i];
-            }
-        }
-
-        return *this;
-    }
-
-    // Accessor functions
-    string getName() const
-    {
-        return name;
-    }
-
-    void setName(const string& n)
-    {
-        if (n.length() > 0)
-        {
-            name = n;
-        }
-        else
-        {
-            throw invalid_argument("Name cannot be empty.");
-        }
-    }
-
-    string getDate() const
-    {
-        return date;
-    }
-
-
-    string getTime() const
-    {
-        return time;
-    }
-
-
-    string getEventType() const
-    {
-        return *eventType;
-    }
-
-    void setEventType(const string& type)
-    {
-        if (type.length() > 0)
-        {
-            *eventType = type;
-        }
-        else
-        {
-            throw invalid_argument("Event type cannot be empty.");
-        }
-    }
-
-    int getMaxSeats() const
-    {
-        return maxSeats;
-    }
-
-    int getSeatsReserved(int index) const
-    {
-        if (index >= 0 && index < maxSeats)
-        {
-            return seatsReserved[index];
-        }
-        else
-        {
-            throw out_of_range("Invalid seat index.");
-        }
-    }
-
-    void setSeatsReserved(int index, int value)
-    {
-        if (index >= 0 && index < maxSeats)
-        {
-            seatsReserved[index] = value;
-        }
-        else
-        {
-            throw out_of_range("Invalid seat index.");
-        }
-    }
-
-    // Display
-    void displayEventInfo() const
-    {
-        cout << "Event: " << name << "\nDate: " << date << "\nTime: " << time << "\nType: " << *eventType << endl;
-    }
-
-    void displaySeatsReserved() const
-    {
-        cout << "Seats Reserved: ";
-        for (int i = 0; i < maxSeats; ++i)
-        {
-            cout << seatsReserved[i] << " ";
-        }
-        cout << endl;
-    }
-
-    // Overloaded << and >> operators
-    friend ostream& operator<<(ostream& os, const Event& event)
-    {
-        os << "Event: " << event.name << "\nDate: " << event.date << "\nTime: " << event.time << "\nType: " << *(event.eventType) << endl;
-        return os;
-    }
-
-    friend istream& operator>>(istream& is, Event& event)
-    {
-        cout << "Enter Event Name: ";
-        is >> event.name;
-        cout << "Enter Date: ";
-        is >> event.date;
-        cout << "Enter Time: ";
-        is >> event.time;
-        cout << "Enter Event Type: ";
-        is >> *(event.eventType);
-
-        return is;
-    }
+    ~Event();
 
     // Overloaded operators
-    bool operator==(const Event& other) const
-    {
-        return (name == other.name) && (date == other.date) && (time == other.time) && (*eventType == *(other.eventType));
-    }
+    Event& operator=(const Event& other);
+    friend ostream& operator<<(ostream& os, const Event& event);
+    friend istream& operator>>(istream& is, Event& event);
+    bool operator==(const Event& other) const;
+    string operator[](int index) const;
+    Event operator+(const Event& other) const;
+    Event operator-(const Event& other) const;
+    Event operator++(); 
+    Event operator--(); 
+    Event operator++(int); 
+    Event operator--(int); 
+    explicit operator int() const; 
+    bool operator!() const; 
+    bool operator<(const Event& other) const;
+    bool operator>(const Event& other) const;
+    bool operator<=(const Event& other) const;
+    bool operator>=(const Event& other) const;
 
-    Event operator+(const Event& other) const
-    {
-        // Define the behavior of the + operator for Events
-        Event result = *this;
-        result.name += other.name;
-        result.date += other.date;
-        result.time += other.time;
-        *(result.eventType) += *(other.eventType);
+    // Accessor functions
+    string getType() const;
+    string getDate() const;
+    string getTime() const;
+    string getLocation() const;
+    int getMaxSeats() const;
 
-        for (int i = 0; i < maxSeats; ++i)
-        {
-            result.seatsReserved[i] += other.seatsReserved[i];
-        }
+    // Setter functions
+    void setType(string t);
+    void setDate(string d);
+    void setTime(string tm);
+    void setLocation(string l);
 
-        return result;
-    }
+    // Display functions
+    void displayEventDetails() const;
+    void displayEventDetails(ostream& os) const;
 
-    // Overloaded [] operator
-    int operator[](int index) const
-    {
-        if (index >= 0 && index < maxSeats)
-        {
-            return seatsReserved[index];
-        }
-        else
-        {
-            throw out_of_range("Invalid seat index.");
-        }
-    }
-
-    // Overloaded +,- operators
-    Event operator++()
-    { // Prefix ++
-        for (int i = 0; i < maxSeats; ++i) {
-            ++seatsReserved[i];
-        }
-        return *this;
-    }
-
-    Event operator--()
-    { // Prefix --
-        for (int i = 0; i < maxSeats; ++i) {
-            --seatsReserved[i];
-        }
-        return *this;
-    }
-
-    Event operator++(int)
-    { // Postfix ++
-        Event temp = *this;
-        for (int i = 0; i < maxSeats; ++i) {
-            ++seatsReserved[i];
-        }
-        return temp;
-    }
-
-    Event operator--(int)
-    { // Postfix --
-        Event temp = *this;
-        for (int i = 0; i < maxSeats; ++i) {
-            --seatsReserved[i];
-        }
-        return temp;
-    }
-
+    // Generic processing methods
+    void processAttributes() const;
+    void displayAttributes() const;
 };
+
+Event::Event() 
+{
+    type = new string("");
+    date = new string("");
+    time = new string("");
+    location = new string("");
+}
+
+Event::Event(string t, string l, string d, string tm) 
+{
+    type = new string(t);
+    date = new string(d);
+    time = new string(tm);
+    location = new string(l);
+}
+
+Event::Event(const Event& other) 
+{
+    type = new string(*(other.type));
+    date = new string(*(other.date));
+    time = new string(*(other.time));
+    location = new string(*(other.location));
+}
+
+Event::~Event() 
+{
+    delete type;
+    delete date;
+    delete time;
+    delete location;
+}
+
+Event& Event::operator=(const Event& other) 
+{
+    if (this != &other) 
+    {
+        delete type;
+        delete date;
+        delete time;
+        delete location;
+
+        type = new string(*(other.type));
+        date = new string(*(other.date));
+        time = new string(*(other.time));
+        location = new string(*(other.location));
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Event& event) 
+{
+    os << "Event Type: " << *(event.type) << endl;
+    os << "Date: " << *(event.date) << endl;
+    os << "Time: " << *(event.time) << endl;
+    os << "Location: " << *(event.location) << endl;
+    return os;
+}
+
+istream& operator>>(istream& is, Event& event) 
+{
+    cout << "Enter the type of the event: ";
+    is.ignore(); // Ignore any previous newline characters in the input buffer
+    getline(is, *event.type);
+
+    cout << "Enter the date of the event (e.g., YYYY-MM-DD): ";
+    getline(is, *event.date);
+
+    cout << "Enter the time of the event: ";
+    getline(is, *event.time);
+
+    cout << "Enter the location of the event: ";
+    getline(is, *event.location);
+
+    return is;
+}
+
+bool Event::operator==(const Event& other) const 
+{
+    return (*type == *(other.type)) && (*date == *(other.date)) &&
+        (*time == *(other.time)) && (*location == *(other.location));
+}
+
+string Event::operator[](int index) const 
+{
+    switch (index) 
+    {
+    case 0:
+        return *type;
+    case 1:
+        return *date;
+    case 2:
+        return *time;
+    case 3:
+        return *location;
+    default:
+        return "";
+    }
+}
+
+Event Event::operator+(const Event& other) const 
+{
+    return Event(*type + *(other.type), *location + *(other.location),
+        *date + *(other.date), *time + *(other.time));
+}
+
+Event Event::operator-(const Event& other) const 
+{
+    return Event(*type, *location, *date, *time); // Ignoring subtraction for strings
+}
+
+Event Event::operator++() 
+{
+    (*type) += "++";
+    return *this;
+}
+
+Event Event::operator--() 
+{
+    (*type) += "--";
+    return *this;
+}
+
+Event Event::operator++(int) 
+{
+    Event temp(*this);
+    (*type) += "++";
+    return temp;
+}
+
+Event Event::operator--(int) 
+{
+    Event temp(*this);
+    (*type) += "--";
+    return temp;
+}
+
+Event::operator int() const 
+{
+    return static_cast<int>(type->length());
+}
+
+bool Event::operator!() const 
+{
+    return type->empty();
+}
+
+bool Event::operator<(const Event& other) const 
+{
+    return (*type < *(other.type));
+}
+
+bool Event::operator>(const Event& other) const 
+{
+    return (*type > *(other.type));
+}
+
+bool Event::operator<=(const Event& other) const 
+{
+    return (*type <= *(other.type));
+}
+
+bool Event::operator>=(const Event& other) const 
+{
+    return (*type >= *(other.type));
+}
+
+int Event::getMaxSeats() const 
+{
+    return MAX_SEATS;
+}
+
+string Event::getType() const 
+{
+    return *type;
+}
+
+string Event::getDate() const 
+{
+    return *date;
+}
+
+string Event::getTime() const 
+{
+    return *time;
+}
+
+string Event::getLocation() const 
+{
+    return *location;
+}
+
+void Event::setType(string t) 
+{
+    *type = t;
+}
+
+void Event::setDate(string d) 
+{
+    *date = d;
+}
+
+void Event::setTime(string tm) 
+{
+    *time = tm;
+}
+
+void Event::setLocation(string l) 
+{
+    *location = l;
+}
+
+void Event::displayEventDetails() const 
+{
+    cout << "Event Type: " << *type << endl;
+    cout << "Date: " << *date << endl;
+    cout << "Time: " << *time << endl;
+    cout << "Location: " << *location << endl;
+}
+
+void Event::displayEventDetails(ostream& os) const 
+{
+    os << "Event Type: " << *type << endl;
+    os << "Date: " << *date << endl;
+    os << "Time: " << *time << endl;
+    os << "Location: " << *location << endl;
+}
+
+void Event::processAttributes() const 
+{
+    cout << "Processing Event Attributes..." << endl;
+}
+
+void Event::displayAttributes() const 
+{
+    cout << "Displaying Event Attributes..." << endl;
+}
