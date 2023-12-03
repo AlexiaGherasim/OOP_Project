@@ -206,35 +206,3 @@ void Menu::displayAttributes() const {
     cout << "Displaying Menu Attributes..." << "\n";
     cout << "Display completed." << "\n";
 }
-
-int main() {
-    Menu menu1("07-01-2020", "10:00", "Concert", "Casa Poporului");
-    cout << "Menu 1\n";
-    menu1.displayMenuDetails();
-    cout << "\n";
-
-    Menu menu2;
-    cout << "Enter details for Menu 2:\n";
-    cin >> menu2;
-
-    cout << "\nMenu 2\n";
-    menu2.displayMenuDetails();
-    cout << "\n";
-
-    Menu menu3 = menu1;
-    cout << "\nMenu 3 (Menu 1 copy):\n";
-    menu3.displayMenuDetails();
-    cout << "\n";
-
-    if (menu1 == menu2) {
-        cout << "\nMenu 1 is equal to Menu 2." << "\n";
-    }
-    else {
-        cout << "\nMenu 1 is not equal to Menu 2." << "\n";
-    }
-
-    menu3.processAttributes();
-    menu3.displayAttributes();
-
-    return 0;
-}
