@@ -1,3 +1,801 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+using namespace std;
+
+class Event {
+private:
+    string* type;
+    string* date;
+    string* time;
+    string* location;
+    const static int MAX_SEATS = 20;
+    string seats[MAX_SEATS];
+
+public:
+    Event();
+    Event(string t, string l, string d, string tm);
+    Event(const Event& other);
+
+    ~Event();
+
+    Event& operator=(const Event& other);
+    friend ostream& operator<<(ostream& os, const Event& event);
+    friend istream& operator>>(istream& is, Event& event);
+    bool operator==(const Event& other) const;
+    string operator[](int index) const;
+    Event operator+(const Event& other) const;
+    Event operator-(const Event& other) const;
+    Event operator++();
+    Event operator--();
+    Event operator++(int);
+    Event operator--(int);
+    explicit operator int() const;
+    bool operator!() const;
+    bool operator<(const Event& other) const;
+    bool operator>(const Event& other) const;
+    bool operator<=(const Event& other) const;
+    bool operator>=(const Event& other) const;
+
+    string getType() const;
+    string getDate() const;
+    string getTime() const;
+    string getLocation() const;
+    int getMaxSeats() const;
+
+    void setType(string t);
+    void setDate(string d);
+    void setTime(string tm);
+    void setLocation(string l);
+
+    void displayEventDetails() const;
+    void displayEventDetails(ostream& os) const;
+
+    void processAttributes() const;
+    void displayAttributes() const;
+};
+
+Event::Event() {
+    type = new string("");
+    date = new string("");
+    time = new string("");
+    location = new string("");
+}
+
+Event::Event(string t, string l, string d, string tm) {
+    type = new string(t);
+    date = new string(d);
+    time = new string(tm);
+    location = new string(l);
+}
+
+Event::Event(const Event& other) {
+    type = new string(*(other.type));
+    date = new string(*(other.date));
+    time = new string(*(other.time));
+    location = new string(*(other.location));
+}
+
+Event::~Event() {
+    delete type;
+    delete date;
+    delete time;
+    delete location;
+}
+
+Event& Event::operator=(const Event& other) {
+    if (this != &other) {
+        delete type;
+        delete date;
+        delete time;
+        delete location;
+
+        type = new string(*(other.type));
+        date = new string(*(other.date));
+        time = new string(*(other.time));
+        location = new string(*(other.location));
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Event& event) {
+    os << "Event Type: " << *(event.type) << "\n";
+    os << "Date: " << *(event.date) << "\n";
+    os << "Time: " << *(event.time) << "\n";
+    os << "Location: " << *(event.location) << "\n";
+    return os;
+}
+
+istream& operator>>(istream& is, Event& event) {
+    cout << "Enter the type of the event: ";
+    is.ignore();
+    getline(is, *event.type);
+
+    cout << "Enter the date of the event (DD-MM-YYYY): ";
+    getline(is, *event.date);
+
+    cout << "Enter the time of the event: ";
+    getline(is, *event.time);
+
+    cout << "Enter the location of the event: ";
+    getline(is, *event.location);
+
+    return is;
+}
+
+bool Event::operator==(const Event& other) const {
+    return (*type == *(other.type)) && (*date == *(other.date)) &&
+        (*time == *(other.time)) && (*location == *(other.location));
+}
+
+string Event::operator[](int index) const {
+    switch (index) {
+    case 0:
+        return *type;
+    case 1:
+        return *date;
+    case 2:
+        return *time;
+    case 3:
+        return *location;
+    default:
+        return "";
+    }
+}
+
+Event Event::operator+(const Event& other) const {
+    return Event(*type + *(other.type), *location + *(other.location),
+        *date + *(other.date), *time + *(other.time));
+}
+
+Event Event::operator-(const Event& other) const {
+    return Event(*type, *location, *date, *time);
+}
+
+Event Event::operator++() {
+    (*type) += "++";
+    return *this;
+}
+
+Event Event::operator--() {
+    (*type) += "--";
+    return *this;
+}
+
+Event Event::operator++(int) {
+    Event temp(*this);
+    (*type) += "++";
+    return temp;
+}
+
+Event Event::operator--(int) {
+    Event temp(*this);
+    (*type) += "--";
+    return temp;
+}
+
+Event::operator int() const {
+    return static_cast<int>(type->length());
+}
+
+bool Event::operator!() const {
+    return type->empty();
+}
+
+bool Event::operator<(const Event& other) const {
+    return (*type < *(other.type));
+}
+
+bool Event::operator>(const Event& other) const {
+    return (*type > *(other.type));
+}
+
+bool Event::operator<=(const Event& other) const {
+    return (*type <= *(other.type));
+}
+
+bool Event::operator>=(const Event& other) const {
+    return (*type >= *(other.type));
+}
+
+int Event::getMaxSeats() const {
+    return MAX_SEATS;
+}
+
+string Event::getType() const {
+    return *type;
+}
+
+string Event::getDate() const {
+    return *date;
+}
+
+string Event::getTime() const {
+    return *time;
+}
+
+string Event::getLocation() const {
+    return *location;
+}
+
+void Event::setType(string t) {
+    *type = t;
+}
+
+void Event::setDate(string d) {
+    *date = d;
+}
+
+void Event::setTime(string tm) {
+    *time = tm;
+}
+
+void Event::setLocation(string l) {
+    *location = l;
+}
+
+void Event::displayEventDetails() const {
+    cout << "Event Type: " << *type << "\n";
+    cout << "Date(DD-MM-YYYY): " << *date << "\n";
+    cout << "Time: " << *time << "\n";
+    cout << "Location: " << *location << "\n";
+}
+
+void Event::displayEventDetails(ostream& os) const {
+    os << "Event Type: " << *type << "\n";
+    os << "Date(DD-MM-YYYY): " << *date << "\n";
+    os << "Time: " << *time << "\n";
+    os << "Location: " << *location << "\n";
+}
+
+void Event::processAttributes() const {
+    cout << "Processing Event Attributes..." << "\n";
+}
+
+void Event::displayAttributes() const {
+    cout << "Displaying Event Attributes..." << "\n";
+}
+
+
+
+class Menu {
+private:
+    string* date;
+    string* time;
+    string* name;
+    string* location;
+    static const int maxAttributes = 4;
+    string attributes[maxAttributes];
+
+public:
+    Menu();
+    Menu(string d, string tm, string n, string l);
+
+    ~Menu();
+
+    Menu& operator=(const Menu& other);
+    friend ostream& operator<<(ostream& os, const Menu& menu);
+    friend istream& operator>>(istream& is, Menu& menu);
+    bool operator==(const Menu& other) const;
+    string operator[](int index) const;
+
+    string getDate() const;
+    string getTime() const;
+    string getName() const;
+    string getLocation() const;
+
+    void setDate(string d);
+    void setTime(string tm);
+    void setName(string n);
+    void setLocation(string l);
+
+    void displayMenuDetails() const;
+    void displayMenuDetails(ostream& os) const;
+
+    void processAttributes() const;
+
+    void displayAttributes() const;
+};
+
+Menu::Menu() {
+    date = new string("");
+    time = new string("");
+    name = new string("");
+    location = new string("");
+}
+
+Menu::Menu(string d, string tm, string n, string l) {
+    date = new string(d);
+    time = new string(tm);
+    name = new string(n);
+    location = new string(l);
+}
+
+Menu::~Menu() {
+    delete date;
+    delete time;
+    delete name;
+    delete location;
+}
+
+Menu& Menu::operator=(const Menu& other) {
+    if (this != &other) {
+        delete date;
+        delete time;
+        delete name;
+        delete location;
+
+        date = new string(*(other.date));
+        time = new string(*(other.time));
+        name = new string(*(other.name));
+        location = new string(*(other.location));
+
+        for (int i = 0; i < maxAttributes; ++i) {
+            attributes[i] = other.attributes[i];
+        }
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Menu& menu) {
+    os << "Date: " << *(menu.date) << "\n";
+    os << "Time: " << *(menu.time) << "\n";
+    os << "Name: " << *(menu.name) << "\n";
+    os << "Location: " << *(menu.location) << "\n";
+
+    os << "Attributes:\n";
+    for (int i = 0; i < menu.maxAttributes; ++i) {
+        os << "Attribute " << i + 1 << ": " << menu.attributes[i] << "\n";
+    }
+
+    return os;
+}
+
+istream& operator>>(istream& is, Menu& menu) {
+    cout << "Enter the date (DD-MM-YYY): ";
+    is.ignore();
+    getline(is, *menu.date);
+
+    cout << "Enter the time: ";
+    getline(is, *menu.time);
+
+    cout << "Enter the name: ";
+    getline(is, *menu.name);
+
+    cout << "Enter the location: ";
+    getline(is, *menu.location);
+
+    for (int i = 0; i < menu.maxAttributes; ++i) {
+        cout << "Enter attribute " << i + 1 << ": ";
+        getline(is, menu.attributes[i]);
+    }
+
+    return is;
+}
+
+bool Menu::operator==(const Menu& other) const {
+    return (*date == *(other.date)) && (*time == *(other.time)) &&
+        (*name == *(other.name)) && (*location == *(other.location)) &&
+        (attributes[0] == other.attributes[0]) &&
+        (attributes[1] == other.attributes[1]) &&
+        (attributes[2] == other.attributes[2]) &&
+        (attributes[3] == other.attributes[3]);
+}
+
+string Menu::operator[](int index) const {
+    switch (index) {
+    case 0:
+        return *date;
+    case 1:
+        return *time;
+    case 2:
+        return *name;
+    case 3:
+        return *location;
+    default:
+        return "";
+    }
+}
+
+string Menu::getDate() const {
+    return *date;
+}
+
+string Menu::getTime() const {
+    return *time;
+}
+
+string Menu::getName() const {
+    return *name;
+}
+
+string Menu::getLocation() const {
+    return *location;
+}
+
+void Menu::setDate(string d) {
+    *date = d;
+}
+
+void Menu::setTime(string tm) {
+    *time = tm;
+}
+
+void Menu::setName(string n) {
+    *name = n;
+}
+
+void Menu::setLocation(string l) {
+    *location = l;
+}
+
+void Menu::displayMenuDetails() const {
+    cout << "Date(DD-MM-YYYY): " << *date << "\n";
+    cout << "Time: " << *time << "\n";
+    cout << "Name: " << *name << "\n";
+    cout << "Location: " << *location << "\n";
+
+    cout << "Attributes:\n";
+    for (int i = 0; i < maxAttributes; ++i) {
+        cout << "Attribute " << i + 1 << ": " << attributes[i] << "\n";
+    }
+}
+
+void Menu::displayMenuDetails(ostream& os) const {
+    os << "Date(DD-MM-YYYY): " << *date << "\n";
+    os << "Time: " << *time << "\n";
+    os << "Name: " << *name << "\n";
+    os << "Location: " << *location << "\n";
+
+    os << "Attributes:\n";
+    for (int i = 0; i < maxAttributes; ++i) {
+        os << "Attribute " << i + 1 << ": " << attributes[i] << "\n";
+    }
+}
+
+void Menu::processAttributes() const {
+    cout << "Processing Menu Attributes..." << "\n";
+    cout << "Processing completed." << "\n";
+}
+
+void Menu::displayAttributes() const {
+    cout << "Displaying Menu Attributes..." << "\n";
+    cout << "Display completed." << "\n";
+}
+
+
+
+class Ticket {
+private:
+    string* type;
+    string* seat;
+    string* time;
+    string* name;
+    string* date;
+    string* location;
+    int id;
+
+public:
+    Ticket();
+    Ticket(string t, string s, string tm, string n, string d, string l);
+    Ticket(const Ticket& other);
+
+    ~Ticket();
+
+    Ticket& operator=(const Ticket& other);
+    friend ostream& operator<<(ostream& os, const Ticket& ticket);
+    friend istream& operator>>(istream& is, Ticket& ticket);
+    bool operator==(const Ticket& other) const;
+    string operator[](int index) const;
+    Ticket operator+(const Ticket& other) const;
+    Ticket operator-(const Ticket& other) const;
+    Ticket operator++();
+    Ticket operator--();
+    Ticket operator++(int);
+    Ticket operator--(int);
+    explicit operator int() const;
+    bool operator!() const;
+    bool operator<(const Ticket& other) const;
+    bool operator>(const Ticket& other) const;
+    bool operator<=(const Ticket& other) const;
+    bool operator>=(const Ticket& other) const;
+
+    string getType() const;
+    string getSeat() const;
+    string getTime() const;
+    string getName() const;
+    string getDate() const;
+    string getLocation() const;
+    int getID() const;
+
+    void setType(string t);
+    void setSeat(string s);
+    void setTime(string tm);
+    void setName(string n);
+    void setDate(string d);
+    void setLocation(string l);
+
+    void displayTicketDetails() const;
+    void displayTicketDetails(ostream& os) const;
+
+    void processAttributes() const;
+
+    void displayAttributes() const;
+
+    static int generateUniqueID();
+};
+
+int Ticket::generateUniqueID() {
+    return rand();
+}
+
+Ticket::Ticket() {
+    type = new string("");
+    seat = new string("");
+    time = new string("");
+    name = new string("");
+    date = new string("");
+    location = new string("");
+    id = generateUniqueID();
+}
+
+Ticket::Ticket(string t, string s, string tm, string n, string d, string l) {
+    type = new string(t);
+    seat = new string(s);
+    time = new string(tm);
+    name = new string(n);
+    date = new string(d);
+    location = new string(l);
+    id = generateUniqueID();
+}
+
+Ticket::Ticket(const Ticket& other) {
+    type = new string(*(other.type));
+    seat = new string(*(other.seat));
+    time = new string(*(other.time));
+    name = new string(*(other.name));
+    date = new string(*(other.date));
+    location = new string(*(other.location));
+    id = other.id;
+}
+
+Ticket::~Ticket() {
+    delete type;
+    delete seat;
+    delete time;
+    delete name;
+    delete date;
+    delete location;
+}
+
+Ticket& Ticket::operator=(const Ticket& other) {
+    if (this != &other) {
+        delete type;
+        delete seat;
+        delete time;
+        delete name;
+        delete date;
+        delete location;
+
+        type = new string(*(other.type));
+        seat = new string(*(other.seat));
+        time = new string(*(other.time));
+        name = new string(*(other.name));
+        date = new string(*(other.date));
+        location = new string(*(other.location));
+        id = other.id;
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Ticket& ticket) {
+    os << "Ticket ID: " << ticket.id << "\n";
+    os << "Type: " << *(ticket.type) << "\n";
+    os << "Seat: " << *(ticket.seat) << "\n";
+    os << "Time: " << *(ticket.time) << "\n";
+    os << "Name: " << *(ticket.name) << "\n";
+    os << "Date: " << *(ticket.date) << "\n";
+    os << "Location: " << *(ticket.location) << "\n";
+    return os;
+}
+
+istream& operator>>(istream& is, Ticket& ticket) {
+    cout << "Enter the type of the ticket: ";
+    is.ignore();
+    getline(is, *ticket.type);
+
+    cout << "Enter the seat number: ";
+    getline(is, *ticket.seat);
+
+    cout << "Enter the time of the event: ";
+    getline(is, *ticket.time);
+
+    cout << "Enter the name on the ticket: ";
+    getline(is, *ticket.name);
+
+    cout << "Enter the date of the event (DD-MM-YYYY): ";
+    getline(is, *ticket.date);
+
+    cout << "Enter the location of the event: ";
+    getline(is, *ticket.location);
+
+    ticket.id = Ticket::generateUniqueID();
+    return is;
+}
+
+bool Ticket::operator==(const Ticket& other) const {
+    return (*type == *(other.type)) && (*seat == *(other.seat)) &&
+        (*time == *(other.time)) && (*name == *(other.name)) &&
+        (*date == *(other.date)) && (*location == *(other.location)) &&
+        (id == other.id);
+}
+
+string Ticket::operator[](int index) const {
+    switch (index) {
+    case 0:
+        return *type;
+    case 1:
+        return *seat;
+    case 2:
+        return *time;
+    case 3:
+        return *name;
+    case 4:
+        return *date;
+    case 5:
+        return *location;
+    default:
+        return "";
+    }
+}
+
+Ticket Ticket::operator+(const Ticket& other) const {
+    return Ticket(*type + *(other.type), *seat + *(other.seat),
+        *time + *(other.time), *name + *(other.name),
+        *date + *(other.date), *location + *(other.location));
+}
+
+Ticket Ticket::operator-(const Ticket& other) const {
+    return Ticket(*type, *seat, *time, *name, *date, *location);
+}
+
+Ticket Ticket::operator++() {
+    (*type) += "++";
+    return *this;
+}
+
+Ticket Ticket::operator--() {
+    (*type) += "--";
+    return *this;
+}
+
+Ticket Ticket::operator++(int) {
+    Ticket temp(*this);
+    (*type) += "++";
+    return temp;
+}
+
+Ticket Ticket::operator--(int) {
+    Ticket temp(*this);
+    (*type) += "--";
+    return temp;
+}
+
+Ticket::operator int() const {
+    return id;
+}
+
+bool Ticket::operator!() const {
+    return type->empty();
+}
+
+bool Ticket::operator<(const Ticket& other) const {
+    return (id < other.id);
+}
+
+bool Ticket::operator>(const Ticket& other) const {
+    return (id > other.id);
+}
+
+bool Ticket::operator<=(const Ticket& other) const {
+    return (id <= other.id);
+}
+
+bool Ticket::operator>=(const Ticket& other) const {
+    return (id >= other.id);
+}
+
+string Ticket::getType() const {
+    return *type;
+}
+
+string Ticket::getSeat() const {
+    return *seat;
+}
+
+string Ticket::getTime() const {
+    return *time;
+}
+
+string Ticket::getName() const {
+    return *name;
+}
+
+string Ticket::getDate() const {
+    return *date;
+}
+
+string Ticket::getLocation() const {
+    return *location;
+}
+
+int Ticket::getID() const {
+    return id;
+}
+
+void Ticket::setType(string t) {
+    *type = t;
+}
+
+void Ticket::setSeat(string s)
+{
+    *seat = s;
+}
+
+void Ticket::setTime(string tm)
+{
+    *time = tm;
+}
+
+void Ticket::setName(string n)
+{
+    *name = n;
+}
+
+void Ticket::setDate(string d)
+{
+    *date = d;
+}
+
+void Ticket::setLocation(string l)
+{
+    *location = l;
+}
+
+void Ticket::displayTicketDetails() const
+{
+    cout << "Ticket ID: " << id << "\n";
+    cout << "Type: " << *type << "\n";
+    cout << "Seat: " << *seat << "\n";
+    cout << "Time: " << *time << "\n";
+    cout << "Name: " << *name << "\n";
+    cout << "Date: " << *date << "\n";
+    cout << "Location: " << *location << "\n";
+}
+
+void Ticket::displayTicketDetails(ostream& os) const
+{
+    os << "Ticket ID: " << id << "\n";
+    os << "Type: " << *type << "\n";
+    os << "Seat: " << *seat << "\n";
+    os << "Time: " << *time << "\n";
+    os << "Name: " << *name << "\n";
+    os << "Date: " << *date << "\n";
+    os << "Location: " << *location << "\n";
+}
+
+void Ticket::processAttributes() const
+{
+    cout << "Processing Ticket Attributes..." << "\n";
+    cout << "Processing completed." << "\n";
+}
+
+void Ticket::displayAttributes() const
+{
+    cout << "Displaying Ticket Attributes..." << endl;
+    cout << "Display completed." << endl;
+}
+
 int main()
 {
     Menu menu1("02-02-2020", "19:00", "Concert", "Casa Poporului");
