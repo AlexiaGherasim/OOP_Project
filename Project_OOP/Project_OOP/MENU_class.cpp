@@ -2,326 +2,239 @@
 #include <string>
 using namespace std;
 
-class Menu 
-{
+class Menu {
 private:
-    string* name;
-    string* location;
     string* date;
     string* time;
-    const int MAX_NAME_LENGTH = 50;
-    static int menuCount; 
+    string* name;
+    string* location;
+    static const int maxAttributes = 4;
+    string attributes[maxAttributes];
 
 public:
-    // Constructors
     Menu();
-    Menu(string n, string l, string d, string t);
-    Menu(const Menu& other);
+    Menu(string d, string tm, string n, string l);
 
-    // Destructor
     ~Menu();
 
-    // Overloaded operators
     Menu& operator=(const Menu& other);
     friend ostream& operator<<(ostream& os, const Menu& menu);
     friend istream& operator>>(istream& is, Menu& menu);
     bool operator==(const Menu& other) const;
     string operator[](int index) const;
-    Menu operator+(const Menu& other) const;
-    Menu operator-(const Menu& other) const;
-    Menu operator++(); // Prefix increment
-    Menu operator--(); // Prefix decrement
-    Menu operator++(int); // Postfix increment
-    Menu operator--(int); // Postfix decrement
-    explicit operator int() const; // Explicit cast to int
-    bool operator!() const; // Negation operator
-    bool operator<(const Menu& other) const;
-    bool operator>(const Menu& other) const;
-    bool operator<=(const Menu& other) const;
-    bool operator>=(const Menu& other) const;
 
-    // Accessor functions
-    string getName() const;
-    string getLocation() const;
     string getDate() const;
     string getTime() const;
-    int getMaxNameLength() const; // Accessor for constant field
+    string getName() const;
+    string getLocation() const;
 
-    // Setter functions
+    void setDate(string d);
+    void setTime(string tm);
     void setName(string n);
     void setLocation(string l);
-    void setDate(string d);
-    void setTime(string t);
 
-    // Display functions
-    void displayMenu() const;
-    void displayMenu(ostream& os) const;
+    void displayMenuDetails() const;
+    void displayMenuDetails(ostream& os) const;
 
-    // Generic processing methods
     void processAttributes() const;
+
     void displayAttributes() const;
-
-    // Static method
-    static int getMenuCount();
-
-    // Exception class for invalid input
-    class InvalidInputException : public exception {
-    public:
-        const char* what() const throw () {
-            return "Invalid input for Menu attribute!";
-        }
-    };
 };
 
-int Menu::menuCount = 0;
-
-Menu::Menu() 
-{
-    name = new string("");
-    location = new string("");
+Menu::Menu() {
     date = new string("");
     time = new string("");
-    menuCount++;
+    name = new string("");
+    location = new string("");
 }
 
-Menu::Menu(string n, string l, string d, string t) 
-{
+Menu::Menu(string d, string tm, string n, string l) {
+    date = new string(d);
+    time = new string(tm);
     name = new string(n);
     location = new string(l);
-    date = new string(d);
-    time = new string(t);
-    menuCount++;
 }
 
-Menu::Menu(const Menu& other) 
-{
-    name = new string(*(other.name));
-    location = new string(*(other.location));
-    date = new string(*(other.date));
-    time = new string(*(other.time));
-    menuCount++;
-}
-
-Menu::~Menu() 
-{
-    delete name;
-    delete location;
+Menu::~Menu() {
     delete date;
     delete time;
-    menuCount--;
+    delete name;
+    delete location;
 }
 
-Menu& Menu::operator=(const Menu& other) 
-{
+Menu& Menu::operator=(const Menu& other) {
     if (this != &other) {
-        delete name;
-        delete location;
         delete date;
         delete time;
+        delete name;
+        delete location;
 
-        name = new string(*(other.name));
-        location = new string(*(other.location));
         date = new string(*(other.date));
         time = new string(*(other.time));
+        name = new string(*(other.name));
+        location = new string(*(other.location));
+
+        for (int i = 0; i < maxAttributes; ++i) {
+            attributes[i] = other.attributes[i];
+        }
     }
     return *this;
 }
 
-ostream& operator<<(ostream& os, const Menu& menu) 
-{
-    os << "Menu Name: " << *(menu.name) << endl;
-    os << "Location: " << *(menu.location) << endl;
-    os << "Date: " << *(menu.date) << endl;
-    os << "Time: " << *(menu.time) << endl;
+ostream& operator<<(ostream& os, const Menu& menu) {
+    os << "Date: " << *(menu.date) << "\n";
+    os << "Time: " << *(menu.time) << "\n";
+    os << "Name: " << *(menu.name) << "\n";
+    os << "Location: " << *(menu.location) << "\n";
+
+    os << "Attributes:\n";
+    for (int i = 0; i < menu.maxAttributes; ++i) {
+        os << "Attribute " << i + 1 << ": " << menu.attributes[i] << "\n";
+    }
+
     return os;
 }
 
-istream& operator>>(istream& is, Menu& menu) 
-{
-    cout << "Enter the name of the event: ";
-    is.ignore(); // Ignore any previous newline characters in the input buffer
-    getline(is, *menu.name);
-
-    cout << "Enter the location of the event: ";
-    getline(is, *menu.location);
-
-    cout << "Enter the date of the event (e.g., YYYY-MM-DD): ";
+istream& operator>>(istream& is, Menu& menu) {
+    cout << "Enter the date (DD-MM-YYY): ";
+    is.ignore();
     getline(is, *menu.date);
 
-    cout << "Enter the time of the event: ";
+    cout << "Enter the time: ";
     getline(is, *menu.time);
+
+    cout << "Enter the name: ";
+    getline(is, *menu.name);
+
+    cout << "Enter the location: ";
+    getline(is, *menu.location);
+
+    for (int i = 0; i < menu.maxAttributes; ++i) {
+        cout << "Enter attribute " << i + 1 << ": ";
+        getline(is, menu.attributes[i]);
+    }
 
     return is;
 }
 
-bool Menu::operator==(const Menu& other) const 
-{
-    return (*name == *(other.name)) && (*location == *(other.location)) &&
-        (*date == *(other.date)) && (*time == *(other.time));
+bool Menu::operator==(const Menu& other) const {
+    return (*date == *(other.date)) && (*time == *(other.time)) &&
+        (*name == *(other.name)) && (*location == *(other.location)) &&
+        (attributes[0] == other.attributes[0]) &&
+        (attributes[1] == other.attributes[1]) &&
+        (attributes[2] == other.attributes[2]) &&
+        (attributes[3] == other.attributes[3]);
 }
 
-string Menu::operator[](int index) const 
-{
+string Menu::operator[](int index) const {
     switch (index) {
     case 0:
-        return *name;
-    case 1:
-        return *location;
-    case 2:
         return *date;
-    case 3:
+    case 1:
         return *time;
+    case 2:
+        return *name;
+    case 3:
+        return *location;
     default:
         return "";
     }
 }
 
-Menu Menu::operator+(const Menu& other) const 
-{
-    return Menu(*name + *(other.name), *location + *(other.location),
-        *date + *(other.date), *time + *(other.time));
-}
-
-Menu Menu::operator-(const Menu& other) const 
-{
-    return Menu(*name, *location, *date, *time); // Ignoring subtraction for strings
-}
-
-Menu Menu::operator++() 
-{
-    (*name) += "++";
-    return *this;
-}
-
-Menu Menu::operator--() 
-{
-    (*name) += "--";
-    return *this;
-}
-
-Menu Menu::operator++(int) 
-{
-    Menu temp(*this);
-    (*name) += "++";
-    return temp;
-}
-
-Menu Menu::operator--(int) 
-{
-    Menu temp(*this);
-    (*name) += "--";
-    return temp;
-}
-
-Menu::operator int() const 
-{
-    return static_cast<int>(name->length());
-}
-
-bool Menu::operator!() const 
-{
-    return name->empty();
-}
-
-bool Menu::operator<(const Menu& other) const 
-{
-    return (*name < *(other.name));
-}
-
-bool Menu::operator>(const Menu& other) const 
-{
-    return (*name > *(other.name));
-}
-
-bool Menu::operator<=(const Menu& other) const 
-{
-    return (*name <= *(other.name));
-}
-
-bool Menu::operator>=(const Menu& other) const 
-{
-    return (*name >= *(other.name));
-}
-
-int Menu::getMenuCount() 
-{
-    return menuCount;
-}
-
-string Menu::getName() const 
-{
-    return *name;
-}
-
-string Menu::getLocation() const 
-{
-    return *location;
-}
-
-string Menu::getDate() const 
-{
+string Menu::getDate() const {
     return *date;
 }
 
-string Menu::getTime() const 
-{
+string Menu::getTime() const {
     return *time;
 }
 
-int Menu::getMaxNameLength() const 
-{
-    return MAX_NAME_LENGTH;
+string Menu::getName() const {
+    return *name;
 }
 
-void Menu::setName(string n) 
-{
-    if (n.length() <= MAX_NAME_LENGTH) {
-        *name = n;
-    }
-    else {
-        throw InvalidInputException();
-    }
+string Menu::getLocation() const {
+    return *location;
 }
 
-void Menu::setLocation(string l) 
-{
-    *location = l;
-}
-
-void Menu::setDate(string d) 
-{
+void Menu::setDate(string d) {
     *date = d;
 }
 
-void Menu::setTime(string t) 
-{
-    *time = t;
+void Menu::setTime(string tm) {
+    *time = tm;
 }
 
-void Menu::displayMenu() const 
-{
-    cout << "Menu Name: " << *name << endl;
-    cout << "Location: " << *location << endl;
-    cout << "Date: " << *date << endl;
-    cout << "Time: " << *time << endl;
+void Menu::setName(string n) {
+    *name = n;
 }
 
-void Menu::displayMenu(ostream& os) const 
-{
-    os << "Menu Name: " << *name << endl;
-    os << "Location: " << *location << endl;
-    os << "Date: " << *date << endl;
-    os << "Time: " << *time << endl;
+void Menu::setLocation(string l) {
+    *location = l;
 }
 
-void Menu::processAttributes() const 
-{
-    cout << "Processing Menu Attributes..." << endl;
-   
+void Menu::displayMenuDetails() const {
+    cout << "Date(DD-MM-YYYY): " << *date << "\n";
+    cout << "Time: " << *time << "\n";
+    cout << "Name: " << *name << "\n";
+    cout << "Location: " << *location << "\n";
+
+    cout << "Attributes:\n";
+    for (int i = 0; i < maxAttributes; ++i) {
+        cout << "Attribute " << i + 1 << ": " << attributes[i] << "\n";
+    }
 }
 
-void Menu::displayAttributes() const 
-{
-    cout << "Displaying Menu Attributes..." << endl;
-    
+void Menu::displayMenuDetails(ostream& os) const {
+    os << "Date(DD-MM-YYYY): " << *date << "\n";
+    os << "Time: " << *time << "\n";
+    os << "Name: " << *name << "\n";
+    os << "Location: " << *location << "\n";
+
+    os << "Attributes:\n";
+    for (int i = 0; i < maxAttributes; ++i) {
+        os << "Attribute " << i + 1 << ": " << attributes[i] << "\n";
+    }
+}
+
+void Menu::processAttributes() const {
+    cout << "Processing Menu Attributes..." << "\n";
+    cout << "Processing completed." << "\n";
+}
+
+void Menu::displayAttributes() const {
+    cout << "Displaying Menu Attributes..." << "\n";
+    cout << "Display completed." << "\n";
+}
+
+int main() {
+    Menu menu1("07-01-2020", "10:00", "Concert", "Casa Poporului");
+    cout << "Menu 1\n";
+    menu1.displayMenuDetails();
+    cout << "\n";
+
+    Menu menu2;
+    cout << "Enter details for Menu 2:\n";
+    cin >> menu2;
+
+    cout << "\nMenu 2\n";
+    menu2.displayMenuDetails();
+    cout << "\n";
+
+    Menu menu3 = menu1;
+    cout << "\nMenu 3 (Menu 1 copy):\n";
+    menu3.displayMenuDetails();
+    cout << "\n";
+
+    if (menu1 == menu2) {
+        cout << "\nMenu 1 is equal to Menu 2." << "\n";
+    }
+    else {
+        cout << "\nMenu 1 is not equal to Menu 2." << "\n";
+    }
+
+    menu3.processAttributes();
+    menu3.displayAttributes();
+
+    return 0;
 }
