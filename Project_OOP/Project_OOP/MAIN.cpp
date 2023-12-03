@@ -1,10 +1,7 @@
-#include <iostream>
-#include <string>
-using namespace std;
-
-int main() {
-    Menu menu1("07-01-2020", "10:00", "Concert", "Casa Poporului");
-    cout << "Menu 1:\n";
+int main()
+{
+    Menu menu1("02-02-2020", "19:00", "Concert", "Casa Poporului");
+    cout << "Menu 1\n";
     menu1.displayMenuDetails();
     cout << "\n";
 
@@ -12,7 +9,7 @@ int main() {
     cout << "Enter details for Menu 2:\n";
     cin >> menu2;
 
-    cout << "\nMenu 2:\n";
+    cout << "\nMenu 2\n";
     menu2.displayMenuDetails();
     cout << "\n";
 
@@ -21,7 +18,8 @@ int main() {
     menu3.displayMenuDetails();
     cout << "\n";
 
-    if (menu1 == menu2) {
+    if (menu1 == menu2)
+    {
         cout << "\nMenu 1 is equal to Menu 2." << "\n";
     }
     else {
@@ -33,9 +31,7 @@ int main() {
 
     cout << "\n-----------------------------\n";
 
-
-    vector<string> details1 = { "Concert", "10:00", "Casa Poporului" };
-    Event event1("Muzica", details1);
+    Event event1("Rock", "Concert", "09:00", "Casa Poporului");
     cout << "Event 1:\n";
     event1.displayEventDetails();
     cout << "\n";
@@ -53,7 +49,8 @@ int main() {
     event3.displayEventDetails();
     cout << "\n";
 
-    if (event1 == event2) {
+    if (event1 == event2)
+    {
         cout << "\nEvent 1 is equal to Event 2." << "\n";
     }
     else {
@@ -65,7 +62,7 @@ int main() {
 
     cout << "\n-----------------------------\n";
 
-    Ticket ticket1("VIP", "07", "10:00", "Maria Elena", "07-01-2020", "Casa Poporului");
+    Ticket ticket1("VIP", "09", "10:00", "Maria Elena", "01-01-2020", "Casa Poporului");
     cout << "Ticket 1:\n";
     ticket1.displayTicketDetails();
     cout << "\n";
@@ -90,7 +87,8 @@ int main() {
 
     cout << "\nTicket 3 ID: " << int(ticket3) << "\n";
 
-    if (!ticket1) {
+    if (!ticket1)
+    {
         cout << "\nTicket 1 is empty." << "\n";
     }
     else {
