@@ -1,16 +1,26 @@
 #include <iostream>
+#include <fstream>
 #include <string>
-#include <cstdlib>
+#include <vector>
 using namespace std;
 
-class Event {
+class Entity
+{
+public:
+    virtual void process() const = 0;
+    virtual ~Entity() {}
+};
+
+class Event : public Entity
+{
 private:
-    string* type;
-    string* date;
-    string* time;
-    string* location;
+    string type;
+    string date;
+    string time;
+    string location;
     const static int MAX_SEATS = 20;
     string seats[MAX_SEATS];
+    vector<string> performers;
 
 public:
     Event();
@@ -51,209 +61,213 @@ public:
     void displayEventDetails() const;
     void displayEventDetails(ostream& os) const;
 
-    void processAttributes() const;
-    void displayAttributes() const;
+    void process() const override;
+
+    void setPerformers(const vector<string>& p)
+    {
+        performers = p;
+    }
+
+    const vector<string>& getPerformers() const
+    {
+        return performers;
+    }
 };
 
-Event::Event() {
-    type = new string("");
-    date = new string("");
-    time = new string("");
-    location = new string("");
-}
+Event::Event() : type(""), date(""), time(""), location("") {}
 
-Event::Event(string t, string l, string d, string tm) {
-    type = new string(t);
-    date = new string(d);
-    time = new string(tm);
-    location = new string(l);
-}
+Event::Event(string t, string l, string d, string tm) : type(t), location(l), date(d), time(tm) {}
 
-Event::Event(const Event& other) {
-    type = new string(*(other.type));
-    date = new string(*(other.date));
-    time = new string(*(other.time));
-    location = new string(*(other.location));
-}
+Event::Event(const Event& other) : type(other.type), location(other.location), date(other.date), time(other.time) {}
 
-Event::~Event() {
-    delete type;
-    delete date;
-    delete time;
-    delete location;
-}
+Event::~Event() {}
 
-Event& Event::operator=(const Event& other) {
-    if (this != &other) {
-        delete type;
-        delete date;
-        delete time;
-        delete location;
-
-        type = new string(*(other.type));
-        date = new string(*(other.date));
-        time = new string(*(other.time));
-        location = new string(*(other.location));
+Event& Event::operator=(const Event& other)
+{
+    if (this != &other)
+    {
+        type = other.type;
+        location = other.location;
+        date = other.date;
+        time = other.time;
     }
     return *this;
 }
 
-ostream& operator<<(ostream& os, const Event& event) {
-    os << "Event Type: " << *(event.type) << "\n";
-    os << "Date: " << *(event.date) << "\n";
-    os << "Time: " << *(event.time) << "\n";
-    os << "Location: " << *(event.location) << "\n";
+ostream& operator<<(ostream& os, const Event& event)
+{
+    os << "Event Type: " << event.type << "\n";
+    os << "Date: " << event.date << "\n";
+    os << "Time: " << event.time << "\n";
+    os << "Location: " << event.location << "\n";
     return os;
 }
 
-istream& operator>>(istream& is, Event& event) {
+istream& operator>>(istream& is, Event& event)
+{
     cout << "Enter the type of the event: ";
     is.ignore();
-    getline(is, *event.type);
+    getline(is, event.type);
 
     cout << "Enter the date of the event (DD-MM-YYYY): ";
-    getline(is, *event.date);
+    getline(is, event.date);
 
     cout << "Enter the time of the event: ";
-    getline(is, *event.time);
+    getline(is, event.time);
 
     cout << "Enter the location of the event: ";
-    getline(is, *event.location);
+    getline(is, event.location);
 
     return is;
 }
 
-bool Event::operator==(const Event& other) const {
-    return (*type == *(other.type)) && (*date == *(other.date)) &&
-        (*time == *(other.time)) && (*location == *(other.location));
+bool Event::operator==(const Event& other) const
+{
+    return (type == other.type) && (date == other.date) && (time == other.time) && (location == other.location);
 }
 
-string Event::operator[](int index) const {
-    switch (index) {
+string Event::operator[](int index) const
+{
+    switch (index)
+    {
     case 0:
-        return *type;
+        return type;
     case 1:
-        return *date;
+        return date;
     case 2:
-        return *time;
+        return time;
     case 3:
-        return *location;
+        return location;
     default:
         return "";
     }
 }
 
-Event Event::operator+(const Event& other) const {
-    return Event(*type + *(other.type), *location + *(other.location),
-        *date + *(other.date), *time + *(other.time));
+Event Event::operator+(const Event& other) const
+{
+    return Event(type + other.type, location + other.location, date + other.date, time + other.time);
 }
 
-Event Event::operator-(const Event& other) const {
-    return Event(*type, *location, *date, *time);
+Event Event::operator-(const Event& other) const
+{
+    return Event(type, location, date, time);
 }
 
-Event Event::operator++() {
-    (*type) += "++";
+Event Event::operator++()
+{
+    type += "++";
     return *this;
 }
 
-Event Event::operator--() {
-    (*type) += "--";
+Event Event::operator--()
+{
+    type += "--";
     return *this;
 }
 
-Event Event::operator++(int) {
+Event Event::operator++(int)
+{
     Event temp(*this);
-    (*type) += "++";
+    type += "++";
     return temp;
 }
 
-Event Event::operator--(int) {
+Event Event::operator--(int)
+{
     Event temp(*this);
-    (*type) += "--";
+    type += "--";
     return temp;
 }
 
-Event::operator int() const {
-    return static_cast<int>(type->length());
+Event::operator int() const
+{
+    return static_cast<int>(type.length());
 }
 
-bool Event::operator!() const {
-    return type->empty();
+bool Event::operator!() const
+{
+    return type.empty();
 }
 
-bool Event::operator<(const Event& other) const {
-    return (*type < *(other.type));
+bool Event::operator<(const Event& other) const
+{
+    return (type < other.type);
 }
 
-bool Event::operator>(const Event& other) const {
-    return (*type > *(other.type));
+bool Event::operator>(const Event& other) const
+{
+    return (type > other.type);
 }
 
-bool Event::operator<=(const Event& other) const {
-    return (*type <= *(other.type));
+bool Event::operator<=(const Event& other) const
+{
+    return (type <= other.type);
 }
 
-bool Event::operator>=(const Event& other) const {
-    return (*type >= *(other.type));
+bool Event::operator>=(const Event& other) const
+{
+    return (type >= other.type);
 }
 
-int Event::getMaxSeats() const {
+int Event::getMaxSeats() const
+{
     return MAX_SEATS;
 }
 
-string Event::getType() const {
-    return *type;
+string Event::getType() const
+{
+    return type;
 }
 
-string Event::getDate() const {
-    return *date;
+string Event::getDate() const
+{
+    return date;
 }
 
-string Event::getTime() const {
-    return *time;
+string Event::getTime() const
+{
+    return time;
 }
 
-string Event::getLocation() const {
-    return *location;
+string Event::getLocation() const
+{
+    return location;
 }
 
-void Event::setType(string t) {
-    *type = t;
+void Event::setType(string t)
+{
+    type = t;
 }
 
-void Event::setDate(string d) {
-    *date = d;
+void Event::setDate(string d)
+{
+    date = d;
 }
 
-void Event::setTime(string tm) {
-    *time = tm;
+void Event::setTime(string tm)
+{
+    time = tm;
 }
 
-void Event::setLocation(string l) {
-    *location = l;
+void Event::setLocation(string l)
+{
+    location = l;
 }
 
-void Event::displayEventDetails() const {
-    cout << "Event Type: " << *type << "\n";
-    cout << "Date(DD-MM-YYYY): " << *date << "\n";
-    cout << "Time: " << *time << "\n";
-    cout << "Location: " << *location << "\n";
+void Event::displayEventDetails() const
+{
+    cout << "Event Type: " << type << "\n";
+    cout << "Date(DD-MM-YYYY): " << date << "\n";
+    cout << "Time: " << time << "\n";
+    cout << "Location: " << location << "\n";
 }
 
-void Event::displayEventDetails(ostream& os) const {
-    os << "Event Type: " << *type << "\n";
-    os << "Date(DD-MM-YYYY): " << *date << "\n";
-    os << "Time: " << *time << "\n";
-    os << "Location: " << *location << "\n";
-}
-
-void Event::processAttributes() const {
-    cout << "Processing Event Attributes..." << "\n";
-}
-
-void Event::displayAttributes() const {
-    cout << "Displaying Event Attributes..." << "\n";
+void Event::displayEventDetails(ostream& os) const
+{
+    os << "Event Type: " << type << "\n";
+    os << "Date(DD-MM-YYYY): " << date << "\n";
+    os << "Time: " << time << "\n";
+    os << "Location: " << location << "\n";
 }
 
 
