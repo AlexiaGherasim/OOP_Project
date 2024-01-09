@@ -628,26 +628,24 @@ public:
 
 
 
-class Ticket {
+class Ticket
+{
 private:
-    string* type;
-    string* seat;
-    string* time;
-    string* name;
-    string* date;
-    string* location;
-    int id;
+    string id;
+    string type;
+    bool isValid;
 
 public:
-    Ticket();
-    Ticket(string t, string s, string tm, string n, string d, string l);
+
+    Ticket() : isValid(false) {}
+
+    Ticket(const string& ticketType);
     Ticket(const Ticket& other);
-
     ~Ticket();
-
     Ticket& operator=(const Ticket& other);
+
     friend ostream& operator<<(ostream& os, const Ticket& ticket);
-    friend istream& operator>>(istream& is, Ticket& ticket);
+
     bool operator==(const Ticket& other) const;
     string operator[](int index) const;
     Ticket operator+(const Ticket& other) const;
@@ -663,301 +661,205 @@ public:
     bool operator<=(const Ticket& other) const;
     bool operator>=(const Ticket& other) const;
 
-    string getType() const;
-    string getSeat() const;
-    string getTime() const;
-    string getName() const;
-    string getDate() const;
-    string getLocation() const;
-    int getID() const;
+    const string& getId() const;
+    const string& getType() const;
+    bool getIsValid() const;
 
-    void setType(string t);
-    void setSeat(string s);
-    void setTime(string tm);
-    void setName(string n);
-    void setDate(string d);
-    void setLocation(string l);
+    void validate();
 
     void displayTicketDetails() const;
-    void displayTicketDetails(ostream& os) const;
-
-    void processAttributes() const;
-
-    void displayAttributes() const;
-
-    static int generateUniqueID();
+    void additionalTicketMethod() const;
 };
 
-int Ticket::generateUniqueID() {
-    return rand();
+Ticket::Ticket(const string& ticketType) : type(ticketType), isValid(false)
+{
+    // Generate a unique ticket ID
+    srand(static_cast<unsigned>(time(nullptr)));
+    id = to_string(rand() % 1000000);
 }
 
-Ticket::Ticket() {
-    type = new string("");
-    seat = new string("");
-    time = new string("");
-    name = new string("");
-    date = new string("");
-    location = new string("");
-    id = generateUniqueID();
-}
+Ticket::Ticket(const Ticket& other) : id(other.id), type(other.type), isValid(other.isValid) {}
 
-Ticket::Ticket(string t, string s, string tm, string n, string d, string l) {
-    type = new string(t);
-    seat = new string(s);
-    time = new string(tm);
-    name = new string(n);
-    date = new string(d);
-    location = new string(l);
-    id = generateUniqueID();
-}
+Ticket::~Ticket() {}
 
-Ticket::Ticket(const Ticket& other) {
-    type = new string(*(other.type));
-    seat = new string(*(other.seat));
-    time = new string(*(other.time));
-    name = new string(*(other.name));
-    date = new string(*(other.date));
-    location = new string(*(other.location));
-    id = other.id;
-}
-
-Ticket::~Ticket() {
-    delete type;
-    delete seat;
-    delete time;
-    delete name;
-    delete date;
-    delete location;
-}
-
-Ticket& Ticket::operator=(const Ticket& other) {
-    if (this != &other) {
-        delete type;
-        delete seat;
-        delete time;
-        delete name;
-        delete date;
-        delete location;
-
-        type = new string(*(other.type));
-        seat = new string(*(other.seat));
-        time = new string(*(other.time));
-        name = new string(*(other.name));
-        date = new string(*(other.date));
-        location = new string(*(other.location));
+Ticket& Ticket::operator=(const Ticket& other)
+{
+    if (this != &other)
+    {
         id = other.id;
+        type = other.type;
+        isValid = other.isValid;
     }
     return *this;
 }
 
-ostream& operator<<(ostream& os, const Ticket& ticket) {
+ostream& operator<<(ostream& os, const Ticket& ticket)
+{
     os << "Ticket ID: " << ticket.id << "\n";
-    os << "Type: " << *(ticket.type) << "\n";
-    os << "Seat: " << *(ticket.seat) << "\n";
-    os << "Time: " << *(ticket.time) << "\n";
-    os << "Name: " << *(ticket.name) << "\n";
-    os << "Date: " << *(ticket.date) << "\n";
-    os << "Location: " << *(ticket.location) << "\n";
+    os << "Ticket Type: " << ticket.type << "\n";
+    os << "Is Valid: " << (ticket.isValid ? "Yes" : "No") << "\n";
     return os;
 }
 
-istream& operator>>(istream& is, Ticket& ticket) {
-    cout << "Enter the type of the ticket: ";
-    is.ignore();
-    getline(is, *ticket.type);
-
-    cout << "Enter the seat number: ";
-    getline(is, *ticket.seat);
-
-    cout << "Enter the time of the event: ";
-    getline(is, *ticket.time);
-
-    cout << "Enter the name on the ticket: ";
-    getline(is, *ticket.name);
-
-    cout << "Enter the date of the event (DD-MM-YYYY): ";
-    getline(is, *ticket.date);
-
-    cout << "Enter the location of the event: ";
-    getline(is, *ticket.location);
-
-    ticket.id = Ticket::generateUniqueID();
-    return is;
+bool Ticket::operator==(const Ticket& other) const
+{
+    return (id == other.id) && (type == other.type) && (isValid == other.isValid);
 }
 
-bool Ticket::operator==(const Ticket& other) const {
-    return (*type == *(other.type)) && (*seat == *(other.seat)) &&
-        (*time == *(other.time)) && (*name == *(other.name)) &&
-        (*date == *(other.date)) && (*location == *(other.location)) &&
-        (id == other.id);
-}
-
-string Ticket::operator[](int index) const {
+string Ticket::operator[](int index) const
+{
     switch (index) {
     case 0:
-        return *type;
+        return id;
     case 1:
-        return *seat;
+        return type;
     case 2:
-        return *time;
-    case 3:
-        return *name;
-    case 4:
-        return *date;
-    case 5:
-        return *location;
+        return isValid ? "Yes" : "No";
     default:
         return "";
     }
 }
 
-Ticket Ticket::operator+(const Ticket& other) const {
-    return Ticket(*type + *(other.type), *seat + *(other.seat),
-        *time + *(other.time), *name + *(other.name),
-        *date + *(other.date), *location + *(other.location));
+Ticket Ticket::operator+(const Ticket& other) const
+{
+    return Ticket(type + other.type);
 }
 
-Ticket Ticket::operator-(const Ticket& other) const {
-    return Ticket(*type, *seat, *time, *name, *date, *location);
+Ticket Ticket::operator-(const Ticket& other) const
+{
+    return Ticket(type);
 }
 
-Ticket Ticket::operator++() {
-    (*type) += "++";
+Ticket Ticket::operator++()
+{
+    type += "++";
     return *this;
 }
 
-Ticket Ticket::operator--() {
-    (*type) += "--";
+Ticket Ticket::operator--()
+{
+    type += "--";
     return *this;
 }
 
-Ticket Ticket::operator++(int) {
+Ticket Ticket::operator++(int)
+{
     Ticket temp(*this);
-    (*type) += "++";
+    type += "++";
     return temp;
 }
 
-Ticket Ticket::operator--(int) {
+Ticket Ticket::operator--(int)
+{
     Ticket temp(*this);
-    (*type) += "--";
+    type += "--";
     return temp;
 }
 
-Ticket::operator int() const {
+Ticket::operator int() const
+{
+    return static_cast<int>(type.length());
+}
+
+bool Ticket::operator!() const
+{
+    return type.empty();
+}
+
+bool Ticket::operator<(const Ticket& other) const
+{
+    return (type < other.type);
+}
+
+bool Ticket::operator>(const Ticket& other) const
+{
+    return (type > other.type);
+}
+
+bool Ticket::operator<=(const Ticket& other) const
+{
+    return (type <= other.type);
+}
+
+bool Ticket::operator>=(const Ticket& other) const
+{
+    return (type >= other.type);
+}
+
+const string& Ticket::getId() const
+{
     return id;
 }
 
-bool Ticket::operator!() const {
-    return type->empty();
-}
-
-bool Ticket::operator<(const Ticket& other) const {
-    return (id < other.id);
-}
-
-bool Ticket::operator>(const Ticket& other) const {
-    return (id > other.id);
-}
-
-bool Ticket::operator<=(const Ticket& other) const {
-    return (id <= other.id);
-}
-
-bool Ticket::operator>=(const Ticket& other) const {
-    return (id >= other.id);
-}
-
-string Ticket::getType() const {
-    return *type;
-}
-
-string Ticket::getSeat() const {
-    return *seat;
-}
-
-string Ticket::getTime() const {
-    return *time;
-}
-
-string Ticket::getName() const {
-    return *name;
-}
-
-string Ticket::getDate() const {
-    return *date;
-}
-
-string Ticket::getLocation() const {
-    return *location;
-}
-
-int Ticket::getID() const {
-    return id;
-}
-
-void Ticket::setType(string t) {
-    *type = t;
-}
-
-void Ticket::setSeat(string s)
+const string& Ticket::getType() const
 {
-    *seat = s;
+    return type;
 }
 
-void Ticket::setTime(string tm)
+bool Ticket::getIsValid() const
 {
-    *time = tm;
+    return isValid;
 }
 
-void Ticket::setName(string n)
+void Ticket::validate()
 {
-    *name = n;
-}
-
-void Ticket::setDate(string d)
-{
-    *date = d;
-}
-
-void Ticket::setLocation(string l)
-{
-    *location = l;
+    isValid = true;
 }
 
 void Ticket::displayTicketDetails() const
 {
-    cout << "Ticket ID: " << id << "\n";
-    cout << "Type: " << *type << "\n";
-    cout << "Seat: " << *seat << "\n";
-    cout << "Time: " << *time << "\n";
-    cout << "Name: " << *name << "\n";
-    cout << "Date: " << *date << "\n";
-    cout << "Location: " << *location << "\n";
+    cout << "Ticket Details:\n";
+    cout << *this;
 }
 
-void Ticket::displayTicketDetails(ostream& os) const
+void Ticket::additionalTicketMethod() const
 {
-    os << "Ticket ID: " << id << "\n";
-    os << "Type: " << *type << "\n";
-    os << "Seat: " << *seat << "\n";
-    os << "Time: " << *time << "\n";
-    os << "Name: " << *name << "\n";
-    os << "Date: " << *date << "\n";
-    os << "Location: " << *location << "\n";
+    cout << "Additional Ticket Method\n";
 }
 
-void Ticket::processAttributes() const
+class TicketManager
 {
-    cout << "Processing Ticket Attributes..." << "\n";
-    cout << "Processing completed." << "\n";
-}
+private:
+    vector<Ticket> issuedTickets;
 
-void Ticket::displayAttributes() const
-{
-    cout << "Displaying Ticket Attributes..." << endl;
-    cout << "Display completed." << endl;
-}
+public:
+    void saveTicketsToFile(const string& filename)
+    {
+        ofstream outputFile(filename, ios::binary | ios::out);
+        if (!outputFile.is_open())
+        {
+            cerr << "Error opening the file for saving.\n";
+            return;
+        }
+
+        for (const Ticket& ticket : issuedTickets)
+        {
+            outputFile.write(reinterpret_cast<const char*>(&ticket), sizeof(Ticket));
+        }
+
+        outputFile.close();
+    }
+
+    void loadTicketsFromFile(const string& filename)
+    {
+        ifstream inputFile(filename, ios::binary | ios::in);
+        if (!inputFile.is_open())
+        {
+            cerr << "Error opening the file for loading.\n";
+            return;
+        }
+
+        issuedTickets.clear();
+
+        Ticket tempTicket;
+        while (inputFile.read(reinterpret_cast<char*>(&tempTicket), sizeof(Ticket)))
+        {
+            issuedTickets.push_back(tempTicket);
+        }
+
+        inputFile.close();
+    }
+};
 
 int main()
 {
