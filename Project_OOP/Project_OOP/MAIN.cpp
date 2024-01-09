@@ -6,10 +6,239 @@
 #include <ctime>
 using namespace std;
 
+class Ticket
+{
+private:
+    string id;
+    string type;
+    bool isValid;
+
+public:
+
+    // Serialize the Ticket object
+    void serialize(ofstream& outFile) const
+    {
+        size_t idSize = id.size();
+        outFile.write(reinterpret_cast<const char*>(&idSize), sizeof(size_t));
+        outFile.write(id.c_str(), idSize);
+
+        size_t typeSize = type.size();
+        outFile.write(reinterpret_cast<const char*>(&typeSize), sizeof(size_t));
+        outFile.write(type.c_str(), typeSize);
+
+        outFile.write(reinterpret_cast<const char*>(&isValid), sizeof(bool));
+    }
+
+    // Deserialize the Ticket object
+    void deserialize(ifstream& inFile)
+    {
+        size_t idSize;
+        inFile.read(reinterpret_cast<char*>(&idSize), sizeof(size_t));
+        char* idBuffer = new char[idSize + 1];
+        inFile.read(idBuffer, idSize);
+        idBuffer[idSize] = '\0';
+        id = idBuffer;
+        delete[] idBuffer;
+
+        size_t typeSize;
+        inFile.read(reinterpret_cast<char*>(&typeSize), sizeof(size_t));
+        char* typeBuffer = new char[typeSize + 1];
+        inFile.read(typeBuffer, typeSize);
+        typeBuffer[typeSize] = '\0';
+        type = typeBuffer;
+        delete[] typeBuffer;
+
+        inFile.read(reinterpret_cast<char*>(&isValid), sizeof(bool));
+    }
+
+
+    Ticket() : isValid(false) {}
+
+    Ticket(const string& ticketType);
+    Ticket(const Ticket& other);
+    ~Ticket();
+    Ticket& operator=(const Ticket& other);
+
+    friend ostream& operator<<(ostream& os, const Ticket& ticket);
+
+    bool operator==(const Ticket& other) const;
+    string operator[](int index) const;
+    Ticket operator+(const Ticket& other) const;
+    Ticket operator-(const Ticket& other) const;
+    Ticket operator++();
+    Ticket operator--();
+    Ticket operator++(int);
+    Ticket operator--(int);
+    explicit operator int() const;
+    bool operator!() const;
+    bool operator<(const Ticket& other) const;
+    bool operator>(const Ticket& other) const;
+    bool operator<=(const Ticket& other) const;
+    bool operator>=(const Ticket& other) const;
+
+    const string& getId() const;
+    const string& getType() const;
+    bool getIsValid() const;
+
+    void validate();
+
+    void displayTicketDetails() const;
+    void additionalTicketMethod() const;
+};
+
+Ticket::Ticket(const string& ticketType) : type(ticketType), isValid(false)
+{
+    // Generate a unique ticket ID
+    srand(static_cast<unsigned>(time(nullptr)));
+    id = to_string(rand() % 1000000);
+}
+
+Ticket::Ticket(const Ticket& other) : id(other.id), type(other.type), isValid(other.isValid) {}
+
+Ticket::~Ticket() {}
+
+Ticket& Ticket::operator=(const Ticket& other)
+{
+    if (this != &other)
+    {
+        id = other.id;
+        type = other.type;
+        isValid = other.isValid;
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Ticket& ticket)
+{
+    os << "Ticket ID: " << ticket.id << "\n";
+    os << "Ticket Type: " << ticket.type << "\n";
+    os << "Is Valid: " << (ticket.isValid ? "Yes" : "No") << "\n";
+    return os;
+}
+
+bool Ticket::operator==(const Ticket& other) const
+{
+    return (id == other.id) && (type == other.type) && (isValid == other.isValid);
+}
+
+string Ticket::operator[](int index) const
+{
+    switch (index) {
+    case 0:
+        return id;
+    case 1:
+        return type;
+    case 2:
+        return isValid ? "Yes" : "No";
+    default:
+        return "";
+    }
+}
+
+Ticket Ticket::operator+(const Ticket& other) const
+{
+    return Ticket(type + other.type);
+}
+
+Ticket Ticket::operator-(const Ticket& other) const
+{
+    return Ticket(type);
+}
+
+Ticket Ticket::operator++()
+{
+    type += "++";
+    return *this;
+}
+
+Ticket Ticket::operator--()
+{
+    type += "--";
+    return *this;
+}
+
+Ticket Ticket::operator++(int)
+{
+    Ticket temp(*this);
+    type += "++";
+    return temp;
+}
+
+Ticket Ticket::operator--(int)
+{
+    Ticket temp(*this);
+    type += "--";
+    return temp;
+}
+
+Ticket::operator int() const
+{
+    return static_cast<int>(type.length());
+}
+
+bool Ticket::operator!() const
+{
+    return type.empty();
+}
+
+bool Ticket::operator<(const Ticket& other) const
+{
+    return (type < other.type);
+}
+
+bool Ticket::operator>(const Ticket& other) const
+{
+    return (type > other.type);
+}
+
+bool Ticket::operator<=(const Ticket& other) const
+{
+    return (type <= other.type);
+}
+
+bool Ticket::operator>=(const Ticket& other) const
+{
+    return (type >= other.type);
+}
+
+const string& Ticket::getId() const
+{
+    return id;
+}
+
+const string& Ticket::getType() const
+{
+    return type;
+}
+
+bool Ticket::getIsValid() const
+{
+    return isValid;
+}
+
+void Ticket::validate()
+{
+    isValid = true;
+}
+
+void Ticket::displayTicketDetails() const
+{
+    cout << "Ticket Details:\n";
+    cout << *this;
+}
+
+void Ticket::additionalTicketMethod() const
+{
+    cout << "Additional Ticket Method\n";
+}
+
 class Entity
 {
 public:
-    virtual void process() const = 0;
+    virtual void process() const
+    {
+        cout << "Processing Entity...\n";
+    }
     virtual ~Entity() {}
 };
 
@@ -22,7 +251,10 @@ private:
     vector<int> seatsPerRow;
 
 public:
+    Location() : maxSeats(0), numRows(0), numZones(0) {}
+
     Location(int max, int rows, int zones, const vector<int>& seats);
+
     Location(const Location& other);
     ~Location();
     Location& operator=(const Location& other);
@@ -279,7 +511,9 @@ void Location::additionalLocationMethod() const
     cout << "Additional Location Method\n";
 }
 
-class Event : public Entity, public Location
+
+
+class Event : public virtual Entity, public virtual Location
 {
 private:
     string type;
@@ -379,7 +613,7 @@ istream& operator>>(istream& is, Event& event)
     getline(is, event.date);
 
     cout << "Enter the time of the event: ";
-    getline(is, event, time);
+    getline(is, event.time);
 
     cout << "Enter the available ticket types (comma-separated): ";
     event.ticketTypes.clear();
@@ -628,194 +862,9 @@ public:
 
 
 
-class Ticket
-{
-private:
-    string id;
-    string type;
-    bool isValid;
 
-public:
 
-    Ticket() : isValid(false) {}
 
-    Ticket(const string& ticketType);
-    Ticket(const Ticket& other);
-    ~Ticket();
-    Ticket& operator=(const Ticket& other);
-
-    friend ostream& operator<<(ostream& os, const Ticket& ticket);
-
-    bool operator==(const Ticket& other) const;
-    string operator[](int index) const;
-    Ticket operator+(const Ticket& other) const;
-    Ticket operator-(const Ticket& other) const;
-    Ticket operator++();
-    Ticket operator--();
-    Ticket operator++(int);
-    Ticket operator--(int);
-    explicit operator int() const;
-    bool operator!() const;
-    bool operator<(const Ticket& other) const;
-    bool operator>(const Ticket& other) const;
-    bool operator<=(const Ticket& other) const;
-    bool operator>=(const Ticket& other) const;
-
-    const string& getId() const;
-    const string& getType() const;
-    bool getIsValid() const;
-
-    void validate();
-
-    void displayTicketDetails() const;
-    void additionalTicketMethod() const;
-};
-
-Ticket::Ticket(const string& ticketType) : type(ticketType), isValid(false)
-{
-    // Generate a unique ticket ID
-    srand(static_cast<unsigned>(time(nullptr)));
-    id = to_string(rand() % 1000000);
-}
-
-Ticket::Ticket(const Ticket& other) : id(other.id), type(other.type), isValid(other.isValid) {}
-
-Ticket::~Ticket() {}
-
-Ticket& Ticket::operator=(const Ticket& other)
-{
-    if (this != &other)
-    {
-        id = other.id;
-        type = other.type;
-        isValid = other.isValid;
-    }
-    return *this;
-}
-
-ostream& operator<<(ostream& os, const Ticket& ticket)
-{
-    os << "Ticket ID: " << ticket.id << "\n";
-    os << "Ticket Type: " << ticket.type << "\n";
-    os << "Is Valid: " << (ticket.isValid ? "Yes" : "No") << "\n";
-    return os;
-}
-
-bool Ticket::operator==(const Ticket& other) const
-{
-    return (id == other.id) && (type == other.type) && (isValid == other.isValid);
-}
-
-string Ticket::operator[](int index) const
-{
-    switch (index) {
-    case 0:
-        return id;
-    case 1:
-        return type;
-    case 2:
-        return isValid ? "Yes" : "No";
-    default:
-        return "";
-    }
-}
-
-Ticket Ticket::operator+(const Ticket& other) const
-{
-    return Ticket(type + other.type);
-}
-
-Ticket Ticket::operator-(const Ticket& other) const
-{
-    return Ticket(type);
-}
-
-Ticket Ticket::operator++()
-{
-    type += "++";
-    return *this;
-}
-
-Ticket Ticket::operator--()
-{
-    type += "--";
-    return *this;
-}
-
-Ticket Ticket::operator++(int)
-{
-    Ticket temp(*this);
-    type += "++";
-    return temp;
-}
-
-Ticket Ticket::operator--(int)
-{
-    Ticket temp(*this);
-    type += "--";
-    return temp;
-}
-
-Ticket::operator int() const
-{
-    return static_cast<int>(type.length());
-}
-
-bool Ticket::operator!() const
-{
-    return type.empty();
-}
-
-bool Ticket::operator<(const Ticket& other) const
-{
-    return (type < other.type);
-}
-
-bool Ticket::operator>(const Ticket& other) const
-{
-    return (type > other.type);
-}
-
-bool Ticket::operator<=(const Ticket& other) const
-{
-    return (type <= other.type);
-}
-
-bool Ticket::operator>=(const Ticket& other) const
-{
-    return (type >= other.type);
-}
-
-const string& Ticket::getId() const
-{
-    return id;
-}
-
-const string& Ticket::getType() const
-{
-    return type;
-}
-
-bool Ticket::getIsValid() const
-{
-    return isValid;
-}
-
-void Ticket::validate()
-{
-    isValid = true;
-}
-
-void Ticket::displayTicketDetails() const
-{
-    cout << "Ticket Details:\n";
-    cout << *this;
-}
-
-void Ticket::additionalTicketMethod() const
-{
-    cout << "Additional Ticket Method\n";
-}
 
 class TicketManager
 {
@@ -834,7 +883,7 @@ public:
 
         for (const Ticket& ticket : issuedTickets)
         {
-            outputFile.write(reinterpret_cast<const char*>(&ticket), sizeof(Ticket));
+            ticket.seriazlize(outputFile);
         }
 
         outputFile.close();
@@ -852,8 +901,9 @@ public:
         issuedTickets.clear();
 
         Ticket tempTicket;
-        while (inputFile.read(reinterpret_cast<char*>(&tempTicket), sizeof(Ticket)))
+        while (!inputFile.eof())
         {
+            tempTicket.deserialize(inputFile);
             issuedTickets.push_back(tempTicket);
         }
 
