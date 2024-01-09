@@ -883,7 +883,7 @@ public:
 
         for (const Ticket& ticket : issuedTickets)
         {
-            ticket.seriazlize(outputFile);
+            ticket.serialize(outputFile);
         }
 
         outputFile.close();
