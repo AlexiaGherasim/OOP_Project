@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 using namespace std;
 
 class Entity
@@ -10,6 +12,272 @@ public:
     virtual void process() const = 0;
     virtual ~Entity() {}
 };
+
+class Location
+{
+private:
+    int maxSeats;
+    int numRows;
+    int numZones;
+    vector<int> seatsPerRow;
+
+public:
+    Location(int max, int rows, int zones, const vector<int>& seats);
+    Location(const Location& other);
+    ~Location();
+    Location& operator=(const Location& other);
+
+    friend ostream& operator<<(ostream& os, const Location& location);
+    friend istream& operator>>(istream& is, Location& location);
+
+    bool operator==(const Location& other) const;
+    int operator[](int index) const;
+    Location operator+(const Location& other) const;
+    Location operator-(const Location& other) const;
+    Location operator++();
+    Location operator--();
+    Location operator++(int);
+    Location operator--(int);
+    explicit operator int() const;
+    bool operator!() const;
+    bool operator<(const Location& other) const;
+    bool operator>(const Location& other) const;
+    bool operator<=(const Location& other) const;
+    bool operator>=(const Location& other) const;
+
+    int getMaxSeats() const;
+    int getNumRows() const;
+    int getNumZones() const;
+    const vector<int>& getSeatsPerRow() const;
+
+    void setMaxSeats(int max);
+    void setNumRows(int rows);
+    void setNumZones(int zones);
+    void setSeatsPerRow(const vector<int>& seats);
+
+    void displayLocationDetails() const;
+    virtual void additionalLocationMethod() const;
+};
+
+Location::Location(int max, int rows, int zones, const vector<int>& seats)
+    : maxSeats(max), numRows(rows), numZones(zones), seatsPerRow(seats) {}
+
+Location::Location(const Location& other)
+    : maxSeats(other.maxSeats), numRows(other.numRows), numZones(other.numZones), seatsPerRow(other.seatsPerRow) {}
+
+Location::~Location() {}
+
+Location& Location::operator=(const Location& other)
+{
+    if (this != &other)
+    {
+        maxSeats = other.maxSeats;
+        numRows = other.numRows;
+        numZones = other.numZones;
+        seatsPerRow = other.seatsPerRow;
+    }
+    return *this;
+}
+
+ostream& operator<<(ostream& os, const Location& location)
+{
+    os << "Max Seats: " << location.maxSeats << "\n";
+    os << "Num Rows: " << location.numRows << "\n";
+    os << "Num Zones: " << location.numZones << "\n";
+    os << "Seats per Row: ";
+    for (int seats : location.seatsPerRow)
+    {
+        os << seats << ", ";
+    }
+    os << "\n";
+    return os;
+}
+
+istream& operator>>(istream& is, Location& location)
+{
+    cout << "Enter the maximum number of seats: ";
+    is >> location.maxSeats;
+
+    cout << "Enter the number of rows: ";
+    is >> location.numRows;
+
+    cout << "Enter the number of zones: ";
+    is >> location.numZones;
+
+    cout << "Enter the seats per row (comma-separated): ";
+    location.seatsPerRow.clear();
+    string seats;
+    is.ignore();
+    getline(is, seats);
+
+    size_t pos = 0;
+    while ((pos = seats.find(',')) != string::npos)
+    {
+        int seat = stoi(seats.substr(0, pos));
+        location.seatsPerRow.push_back(seat);
+        seats.erase(0, pos + 1);
+    }
+    location.seatsPerRow.push_back(stoi(seats));
+
+    return is;
+}
+
+bool Location::operator==(const Location& other) const
+{
+    return (maxSeats == other.maxSeats) && (numRows == other.numRows) && (numZones == other.numZones) && (seatsPerRow == other.seatsPerRow);
+}
+
+int Location::operator[](int index) const
+{
+    if (index >= 0 && index < seatsPerRow.size())
+    {
+        return seatsPerRow[index];
+    }
+    return -1;
+}
+
+Location Location::operator+(const Location& other) const
+{
+    vector<int> combinedSeatsPerRow = seatsPerRow;
+    combinedSeatsPerRow.insert(combinedSeatsPerRow.end(), other.seatsPerRow.begin(), other.seatsPerRow.end());
+    return Location(maxSeats + other.maxSeats, numRows + other.numRows, numZones + other.numZones, combinedSeatsPerRow);
+}
+
+Location Location::operator-(const Location& other) const
+{
+    return Location(maxSeats, numRows, numZones, seatsPerRow);
+}
+
+Location Location::operator++()
+{
+    maxSeats++;
+    numRows++;
+    numZones++;
+    for (int& seats : seatsPerRow)
+    {
+        seats++;
+    }
+    return *this;
+}
+
+Location Location::operator--()
+{
+    maxSeats--;
+    numRows--;
+    numZones--;
+    for (int& seats : seatsPerRow)
+    {
+        seats--;
+    }
+    return *this;
+}
+
+Location Location::operator++(int)
+{
+    Location temp(*this);
+    maxSeats++;
+    numRows++;
+    numZones++;
+    for (int& seats : seatsPerRow)
+    {
+        seats++;
+    }
+    return temp;
+}
+
+Location Location::operator--(int)
+{
+    Location temp(*this);
+    maxSeats--;
+    numRows--;
+    numZones--;
+    for (int& seats : seatsPerRow)
+    {
+        seats--;
+    }
+    return temp;
+}
+
+Location::operator int() const
+{
+    return static_cast<int>(maxSeats);
+}
+
+bool Location::operator!() const
+{
+    return maxSeats == 0;
+}
+
+bool Location::operator<(const Location& other) const
+{
+    return maxSeats < other.maxSeats;
+}
+
+bool Location::operator>(const Location& other) const
+{
+    return maxSeats > other.maxSeats;
+}
+
+bool Location::operator<=(const Location& other) const
+{
+    return maxSeats <= other.maxSeats;
+}
+
+bool Location::operator>=(const Location& other) const
+{
+    return maxSeats >= other.maxSeats;
+}
+
+int Location::getMaxSeats() const
+{
+    return maxSeats;
+}
+
+int Location::getNumRows() const
+{
+    return numRows;
+}
+
+int Location::getNumZones() const
+{
+    return numZones;
+}
+
+const vector<int>& Location::getSeatsPerRow() const
+{
+    return seatsPerRow;
+}
+
+void Location::setMaxSeats(int max)
+{
+    maxSeats = max;
+}
+
+void Location::setNumRows(int rows)
+{
+    numRows = rows;
+}
+
+void Location::setNumZones(int zones)
+{
+    numZones = zones;
+}
+
+void Location::setSeatsPerRow(const vector<int>& seats)
+{
+    seatsPerRow = seats;
+}
+
+void Location::displayLocationDetails() const
+{
+    cout << "Location Details:\n";
+    cout << *this;
+}
+
+void Location::additionalLocationMethod() const
+{
+    cout << "Additional Location Method\n";
+}
 
 class Event : public Entity
 {
