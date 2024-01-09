@@ -279,27 +279,24 @@ void Location::additionalLocationMethod() const
     cout << "Additional Location Method\n";
 }
 
-class Event : public Entity
+class Event : public Entity, public Location
 {
 private:
     string type;
     string date;
     string time;
-    string location;
-    const static int MAX_SEATS = 20;
-    string seats[MAX_SEATS];
-    vector<string> performers;
+    vector<string> ticketTypes;
+    vector<Ticket> issuedTickets;
 
 public:
-    Event();
-    Event(string t, string l, string d, string tm);
+    Event(string t, string d, string tm, const vector<string>& types);
     Event(const Event& other);
-
     ~Event();
-
     Event& operator=(const Event& other);
+
     friend ostream& operator<<(ostream& os, const Event& event);
     friend istream& operator>>(istream& is, Event& event);
+
     bool operator==(const Event& other) const;
     string operator[](int index) const;
     Event operator+(const Event& other) const;
@@ -318,46 +315,37 @@ public:
     string getType() const;
     string getDate() const;
     string getTime() const;
-    string getLocation() const;
-    int getMaxSeats() const;
+    const vector<string>& getTicketTypes() const;
+    const vector<Ticket>& getIssuedTickets() const;
 
     void setType(string t);
     void setDate(string d);
     void setTime(string tm);
-    void setLocation(string l);
+    void setTicketTypes(const vector<string>& types);
+
+    void generateTickets();
+    bool validateTicket(const string& ticketId);
 
     void displayEventDetails() const;
-    void displayEventDetails(ostream& os) const;
-
-    void process() const override;
-
-    void setPerformers(const vector<string>& p)
-    {
-        performers = p;
-    }
-
-    const vector<string>& getPerformers() const
-    {
-        return performers;
-    }
+    void additionalEventMethod() const;
 };
 
-Event::Event() : type(""), date(""), time(""), location("") {}
+Event::Event(string t, string d, string tm, const vector<string>& types)
+    : type(t), date(d), time(tm), ticketTypes(types) {}
 
-Event::Event(string t, string l, string d, string tm) : type(t), location(l), date(d), time(tm) {}
-
-Event::Event(const Event& other) : type(other.type), location(other.location), date(other.date), time(other.time) {}
+Event::Event(const Event& other)
+    : type(other.type), date(other.date), time(other.time), ticketTypes(other.ticketTypes), issuedTickets(other.issuedTickets) {}
 
 Event::~Event() {}
 
 Event& Event::operator=(const Event& other)
 {
-    if (this != &other)
-    {
+    if (this != &other) {
         type = other.type;
-        location = other.location;
         date = other.date;
         time = other.time;
+        ticketTypes = other.ticketTypes;
+        issuedTickets = other.issuedTickets;
     }
     return *this;
 }
@@ -367,7 +355,17 @@ ostream& operator<<(ostream& os, const Event& event)
     os << "Event Type: " << event.type << "\n";
     os << "Date: " << event.date << "\n";
     os << "Time: " << event.time << "\n";
-    os << "Location: " << event.location << "\n";
+    os << "Ticket Types: ";
+    for (const string& ticketType : event.ticketTypes)
+    {
+        os << ticketType << ", ";
+    }
+    os << "\n";
+    os << "Issued Tickets:\n";
+    for (const Ticket& ticket : event.issuedTickets)
+    {
+        os << ticket;
+    }
     return os;
 }
 
@@ -381,31 +379,39 @@ istream& operator>>(istream& is, Event& event)
     getline(is, event.date);
 
     cout << "Enter the time of the event: ";
-    getline(is, event.time);
+    getline(is, event, time);
 
-    cout << "Enter the location of the event: ";
-    getline(is, event.location);
+    cout << "Enter the available ticket types (comma-separated): ";
+    event.ticketTypes.clear();
+    string types;
+    is.ignore();
+    getline(is, types);
+
+    size_t pos = 0;
+    while ((pos = types.find(',')) != string::npos)
+    {
+        event.ticketTypes.push_back(types.substr(0, pos));
+        types.erase(0, pos + 1);
+    }
+    event.ticketTypes.push_back(types); // Add the last type
 
     return is;
 }
 
 bool Event::operator==(const Event& other) const
 {
-    return (type == other.type) && (date == other.date) && (time == other.time) && (location == other.location);
+    return (type == other.type) && (date == other.date) && (time == other.time) && (ticketTypes == other.ticketTypes) && (issuedTickets == other.issuedTickets);
 }
 
 string Event::operator[](int index) const
 {
-    switch (index)
-    {
+    switch (index) {
     case 0:
         return type;
     case 1:
         return date;
     case 2:
         return time;
-    case 3:
-        return location;
     default:
         return "";
     }
@@ -413,12 +419,14 @@ string Event::operator[](int index) const
 
 Event Event::operator+(const Event& other) const
 {
-    return Event(type + other.type, location + other.location, date + other.date, time + other.time);
+    vector<string> combinedTicketTypes = ticketTypes;
+    combinedTicketTypes.insert(combinedTicketTypes.end(), other.ticketTypes.begin(), other.ticketTypes.end());
+    return Event(type + other.type, date + other.date, time + other.time, combinedTicketTypes);
 }
 
 Event Event::operator-(const Event& other) const
 {
-    return Event(type, location, date, time);
+    return Event(type, date, time, ticketTypes);
 }
 
 Event Event::operator++()
@@ -477,11 +485,6 @@ bool Event::operator>=(const Event& other) const
     return (type >= other.type);
 }
 
-int Event::getMaxSeats() const
-{
-    return MAX_SEATS;
-}
-
 string Event::getType() const
 {
     return type;
@@ -497,9 +500,14 @@ string Event::getTime() const
     return time;
 }
 
-string Event::getLocation() const
+const vector<string>& Event::getTicketTypes() const
 {
-    return location;
+    return ticketTypes;
+}
+
+const vector<Ticket>& Event::getIssuedTickets() const
+{
+    return issuedTickets;
 }
 
 void Event::setType(string t)
@@ -517,25 +525,41 @@ void Event::setTime(string tm)
     time = tm;
 }
 
-void Event::setLocation(string l)
+void Event::setTicketTypes(const vector<string>& types)
 {
-    location = l;
+    ticketTypes = types;
+}
+
+void Event::generateTickets()
+{
+    for (const string& ticketType : ticketTypes)
+    {
+        issuedTickets.emplace_back(ticketType);
+    }
+}
+
+bool Event::validateTicket(const string& ticketId)
+{
+    for (Ticket& ticket : issuedTickets)
+    {
+        if (ticket.getId() == ticketId)
+        {
+            ticket.validate();
+            return true;
+        }
+    }
+    return false;
 }
 
 void Event::displayEventDetails() const
 {
-    cout << "Event Type: " << type << "\n";
-    cout << "Date(DD-MM-YYYY): " << date << "\n";
-    cout << "Time: " << time << "\n";
-    cout << "Location: " << location << "\n";
+    cout << "Event Details:\n";
+    cout << *this;
 }
 
-void Event::displayEventDetails(ostream& os) const
+void Event::additionalEventMethod() const
 {
-    os << "Event Type: " << type << "\n";
-    os << "Date(DD-MM-YYYY): " << date << "\n";
-    os << "Time: " << time << "\n";
-    os << "Location: " << location << "\n";
+    cout << "Additional Event Method\n";
 }
 
 
